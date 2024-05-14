@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingBot.Domain", "TradingBot.Domain\TradingBot.Domain.csproj", "{D5AEB64B-2F06-41E3-96A5-E647479B9B3F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{A62BB213-8200-4B61-8C6C-8BE37CFEF2CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingBot.Application", "TradingBot.Application\TradingBot.Application.csproj", "{82F2DA4E-F990-447D-B70A-05F10D25F3C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5AEB64B-2F06-41E3-96A5-E647479B9B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5AEB64B-2F06-41E3-96A5-E647479B9B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5AEB64B-2F06-41E3-96A5-E647479B9B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5AEB64B-2F06-41E3-96A5-E647479B9B3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82F2DA4E-F990-447D-B70A-05F10D25F3C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82F2DA4E-F990-447D-B70A-05F10D25F3C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82F2DA4E-F990-447D-B70A-05F10D25F3C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82F2DA4E-F990-447D-B70A-05F10D25F3C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D5AEB64B-2F06-41E3-96A5-E647479B9B3F} = {A62BB213-8200-4B61-8C6C-8BE37CFEF2CD}
+		{82F2DA4E-F990-447D-B70A-05F10D25F3C2} = {A62BB213-8200-4B61-8C6C-8BE37CFEF2CD}
+	EndGlobalSection
+EndGlobal
