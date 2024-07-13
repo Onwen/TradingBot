@@ -6,7 +6,7 @@ namespace TradingBot.Domain.Mapping;
 public static class GetMyBalancesResponseMappingExtension
 {
     // map GetMyBalancesResponse to PositionModel
-    public static List<PositionModel> MapToPositionModel(this GetMyBalancesResponse response)
+    public static List<PositionModel> MapToPositionModel(this GetMyBalancesResponse response, string exchange, DateTimeOffset utcNow)
     {
         if (response == null || response.Balances == null)
         {
@@ -19,10 +19,12 @@ public static class GetMyBalancesResponseMappingExtension
             foreach (var pair in balance)
             {
                 //TODO: improve this ugly code.
-                var position = new PositionModel
+                var position = new PositionModel(utcNow)
                 {
+                    Exchange = exchange,
                     Name = pair.Key,
-                    Quantity = pair.Value.Balance
+                    Quantity = pair.Value.Balance,
+                    Timestamp = utcNow
                 };
                 result.Add(position);
             }

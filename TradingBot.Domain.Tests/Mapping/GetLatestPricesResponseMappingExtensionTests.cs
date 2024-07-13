@@ -1,10 +1,11 @@
 using TradingBot.Domain.API.CoinSpotAPI.Response;
 using TradingBot.Domain.Mapping;
 
-namespace TradingBot.Domain.Tests;
+namespace TradingBot.Domain.Tests.Mapping;
 
 public class GetLatestPricesResponseMappingExtensionTests
 {
+    private const string TestExchange = "exchange";
     // test mapping GetLatestPricesResponse to PriceSnapshotModel successfully
     [Fact]
     public void MapToTickerModels_Success()
@@ -34,14 +35,16 @@ public class GetLatestPricesResponseMappingExtensionTests
         };
 
         // Act
-        var result = response.MapToTickerModels();
+        var result = response.MapToTickerModels(TestExchange);
 
         // Assert
         Assert.Equal(2, result.Count);
+        Assert.Equal(TestExchange, result[0].Exchange);
         Assert.Equal("BTC", result[0].Name);
         Assert.Equal(1000, result[0].Ask);
         Assert.Equal(900, result[0].Bid);
         Assert.Equal(950, result[0].Last);
+        Assert.Equal(TestExchange, result[1].Exchange);
         Assert.Equal("ETH", result[1].Name);
         Assert.Equal(100, result[1].Ask);
         Assert.Equal(90, result[1].Bid);
@@ -55,7 +58,7 @@ public class GetLatestPricesResponseMappingExtensionTests
         GetLatestPricesResponse response = null;
 
         // Act
-        var result = response.MapToTickerModels();
+        var result = response.MapToTickerModels(TestExchange);
 
         // Assert
         Assert.Empty(result);
@@ -71,7 +74,7 @@ public class GetLatestPricesResponseMappingExtensionTests
         };
 
         // Act
-        var result = response.MapToTickerModels();
+        var result = response.MapToTickerModels(TestExchange);
 
         // Assert
         Assert.Empty(result);
@@ -87,7 +90,7 @@ public class GetLatestPricesResponseMappingExtensionTests
         };
 
         // Act
-        var result = response.MapToTickerModels();
+        var result = response.MapToTickerModels(TestExchange);
 
         // Assert
         Assert.Empty(result);

@@ -211,11 +211,13 @@ public class CoinspotAPITests
         var apiClient = RestService.For<ICoinSpotApi>(httpClient);
 
         // Act
-        var response = await apiClient.PlaceMarketBuyNowOrder(new ()
+        var response = await apiClient.PlaceMarketBuyOrder(new ()
         {
             Amount = 1.234m,
             CoinType = "BTC",
-            AmountType = "AUD",
+            MarketType = "AUD",
+            Rate = 123.344m
+            
         });
 
         // Assert
@@ -266,7 +268,7 @@ public class CoinspotAPITests
         var apiClient = RestService.For<ICoinSpotApi>(httpClient);
 
         // Act
-        var response = await apiClient.PlaceMarketSellNowOrder(new ());
+        var response = await apiClient.PlaceMarketSellOrder(new ());
 
         // Assert
         Assert.NotNull(response);
@@ -277,5 +279,137 @@ public class CoinspotAPITests
         Assert.Equal(1.234m, response.Amount);
         Assert.Equal(123.344m, response.Rate);
         Assert.Equal("12345678901234567890", response.Id);
+    }
+    // test GetCompletedMarketOrdersAsync
+    [Fact]
+    public async Task GetCompletedMarketOrdersAsync_ShouldParseResponseCorrectly()
+    {
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+
+        var jsonResponse = @"
+        {
+           ""status"":""ok"",
+           ""message"":""ok"",
+           ""buyorders"":[
+              {
+                 ""id"":""12345678901234567890"",
+                 ""coin"":""BTC"",
+                 ""market"":""BTC/AUD"",
+                 ""amount"":1.234,
+                 ""rate"":123.344,
+                 ""status"":""completed"",
+                 ""audfeeexgst"":123.344,
+                 ""audgst"":123.344,
+                 ""audtotal"":123.344,
+                 ""solddate"":""2022-01-01T00:00:00Z""
+              }
+           ],
+           ""sellorders"":[
+              {
+                 ""id"":""12345678901234567890"",
+                 ""coin"":""BTC"",
+                 ""market"":""BTC/AUD"",
+                 ""amount"":1.234,
+                 ""rate"":123.344,
+                 ""status"":""completed"",
+                 ""audfeeexgst"":123.344,
+                 ""audgst"":123.344,
+                 ""audtotal"":123.344,
+                 ""solddate"":""2022-01-01T00:00:00Z""
+              }
+           ]
+        }";
+
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse)
+            });
+
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object)
+        {
+            BaseAddress = new Uri("https://www.coinspot.com.au")
+        };
+
+        var apiClient = RestService.For<ICoinSpotApi>(httpClient);
+
+        // Act
+        var response = await apiClient.GetCompletedMarketOrders(new());
+
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal("ok", response.Status);
+        Assert.Equal("ok", response.Message);
+        Assert.NotNull(response.BuyOrders);
+        Assert.Equal(response.BuyOrders.Count, 1);
+        Assert.NotNull(response.SellOrders);
+        Assert.Equal(response.SellOrders.Count, 1);
+
+        var buyOrder = response.BuyOrders[0];
+        Assert.Equal("12345678901234567890", buyOrder.Id);
+        Assert.Equal("BTC", buyOrder.Coin);
+        Assert.Equal("BTC/AUD", buyOrder.Market);
+        Assert.Equal(1.234m, buyOrder.Amount);
+        Assert.Equal(123.344m, buyOrder.Rate);
+        Assert.Equal(123.344m, buyOrder.AudFeeExGst);
+        Assert.Equal(123.344m, buyOrder.AudGst);
+        Assert.Equal(123.344m, buyOrder.AudTotal);
+        Assert.Equal(DateTimeOffset.Parse("2022-01-01T00:00:00Z"), buyOrder.SoldDate);
+        
+        var sellOrder = response.SellOrders[0];
+        Assert.Equal("12345678901234567890", sellOrder.Id);
+        Assert.Equal("BTC", sellOrder.Coin);
+        Assert.Equal("BTC/AUD", sellOrder.Market);
+        Assert.Equal(1.234m, sellOrder.Amount);
+        Assert.Equal(123.344m, sellOrder.Rate);
+        Assert.Equal(123.344m, sellOrder.AudFeeExGst);
+        Assert.Equal(123.344m, sellOrder.AudGst);
+        Assert.Equal(123.344m, sellOrder.AudTotal);
+        Assert.Equal(DateTimeOffset.Parse("2022-01-01T00:00:00Z"), sellOrder.SoldDate);
+    }
+    // test cancel order
+    [Fact]
+    public async Task CancelMarketOrderAsync_ShouldParseResponseCorrectly()
+    {
+        // Arrange
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+
+        var jsonResponse = @"
+        {
+           ""status"":""ok"",
+           ""message"":""ok""
+        }";
+
+        mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse)
+            });
+
+        var httpClient = new HttpClient(mockHttpMessageHandler.Object)
+        {
+            BaseAddress = new Uri("https://www.coinspot.com.au")
+        };
+
+        var apiClient = RestService.For<ICoinSpotApi>(httpClient);
+
+        // Act
+        var response = await apiClient.CancelMarketBuyOrder(new());
+
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal("ok", response.Status);
+        Assert.Equal("ok", response.Message);
     }
 }
