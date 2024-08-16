@@ -18,10 +18,10 @@ public static class MarketOrderModelMappingExtension
             marketOrder.Amount,
             marketOrder.Cancelled,
             marketOrder.Total,
-            marketOrder.SoldDate,
+            marketOrder.SoldDate?.DateTime,
             marketOrder.AudFeeExGst,
             marketOrder.AudGst,
             marketOrder.AudTotal,
-            marketOrder.Timestamp);
+            marketOrder.Timestamp.DateTime);
     }
 }

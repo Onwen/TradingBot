@@ -1,3 +1,4 @@
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 using TradingBot.Domain.Model;
 
@@ -10,10 +11,10 @@ public class PositionTargetWeightingDtoMappingExtensionTests
     public void MapToPositionTargetWeightingDto_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var positionTargetWeightingModel = new PositionTargetWeightingModel(now)
         {
-            Name = "BTC",
+            Name = Coin.BTC,
             TargetWeighting = 0.5m,
         };
 
@@ -21,7 +22,7 @@ public class PositionTargetWeightingDtoMappingExtensionTests
         var result = positionTargetWeightingModel.MapToPositionTargetWeightingDto();
 
         // Assert
-        Assert.Equal("BTC", result.Name);
+        Assert.Equal(Coin.BTC, result.Name);
         Assert.Equal(0.5m, result.TargetWeighting);
         Assert.Equal(now, result.Timestamp);
     }
@@ -43,17 +44,17 @@ public class PositionTargetWeightingDtoMappingExtensionTests
     public void MapToPositionTargetWeightingDto_List_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var positionTargetWeightingModelList = new List<PositionTargetWeightingModel>
         {
             new PositionTargetWeightingModel(now)
             {
-                Name = "BTC",
+                Name = Coin.BTC,
                 TargetWeighting = 0.5m
             },
             new PositionTargetWeightingModel(now)
             {
-                Name = "ETH",
+                Name = Coin.ETH,
                 TargetWeighting = 0.3m
             }
         };
@@ -63,10 +64,10 @@ public class PositionTargetWeightingDtoMappingExtensionTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(0.5m, result[0].TargetWeighting);
         Assert.Equal(now, result[0].Timestamp);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(0.3m, result[1].TargetWeighting);
         Assert.Equal(now, result[1].Timestamp);
     }

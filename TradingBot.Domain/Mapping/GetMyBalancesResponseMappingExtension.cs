@@ -22,8 +22,9 @@ public static class GetMyBalancesResponseMappingExtension
                 var position = new PositionModel(utcNow)
                 {
                     Exchange = exchange,
-                    Name = pair.Key,
+                    Name = pair.Key.ToUpper(),
                     Quantity = pair.Value.Balance,
+                    CurrentPrice = pair.Value.Rate,
                     Timestamp = utcNow
                 };
                 result.Add(position);

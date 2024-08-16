@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Logging;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 using TradingBot.Domain.Model;
 using TradingBot.Domain.Provider;
 using TradingBot.Domain.Repository.Order;
 using TradingBot.Domain.Repository.Position;
 using TradingBot.Domain.Repository.PositionTargetWeighting;
+using TradingBot.Domain.Repository.PriceHistory;
 using TradingBot.Domain.Repository.Return;
 using TradingBot.Domain.Repository.StrategyLog;
 using TradingBot.Domain.Repository.Ticker;
@@ -19,73 +21,14 @@ public class CoinSpotExchangeService(
     IPositionTargetWeightingRepository positionTargetWeightingRepository,
     IReturnRepository returnRepository,
     IOrderRepository orderRepository,
+    IPriceHistoryRepository priceHistoryRepository,
     IExchangeProvider exchangeProvider,
     TimeProvider timeProvider,
     ILogger<CoinSpotExchangeService> logger)
     : IExchangeService
 {
     private const string Exchange = "CoinSpot";
-    private readonly List<string> _tickers = ["BTC", "ETH", "XRP"];
-
-    public async Task<List<PriceSnapshotModel>> GetPriceSnapshotsAsync()
-    {
-        try
-        {
-            logger.LogInformation("Getting price snapshots");
-            var tickers = await exchangeProvider.GetPriceSnapshots();
-            if (tickers.Count > 0 && !positionSnapshotRepository.SavePriceSnapshots(tickers.MapToPriceSnapshotDto(timeProvider.GetUtcNow())))
-            {
-                logger.LogError("Failed to save price snapshots");
-                throw new Exception("Failed to save price snapshots");
-            }
-
-            logger.LogInformation("Price snapshots: {tickers}", tickers);
-            return tickers.Where(t => _tickers.Contains(t.Name)).ToList();
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Failed to get price snapshots");
-            throw;
-        }
-    }
-
-    public async Task<PortfolioModel> GetPortfoliosAsync()
-    {
-        try
-        {
-            logger.LogInformation("Getting portfolio");
-            var positions = await exchangeProvider.GetPortfolio();
-            var priceSnapshots = await GetPriceSnapshotsAsync();
-            if (!positionRepository.SavePositions(Exchange, positions.MapToPositionDto(timeProvider.GetUtcNow())))
-            {
-                logger.LogError("Failed to save positions");
-                throw new Exception("Failed to save positions");
-            }
-            logger.LogInformation("Portfolio: {positions}", positions);
-            return positions.MapToPortfolioModel(priceSnapshots, Exchange, timeProvider.GetUtcNow());
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Failed to get portfolio");
-            throw;
-        }
-    }
-    
-    public async Task<List<PriceSnapshotModel>> GetDailyPricesAsync(DateTimeOffset from, DateTimeOffset to)
-    {
-        try
-        {
-            logger.LogInformation("Getting daily prices");
-            var prices = await positionSnapshotRepository.GetDailyPrices(from, to);
-            logger.LogInformation("Daily prices: {prices}", prices);
-            return prices.MapToPriceSnapshotModel();
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Failed to get daily prices");
-            throw;
-        }
-    }
+    private readonly List<string> _tickers = [Coin.BTC, Coin.ETH, Coin.XRP, Coin.LTC, Coin.DOGE];
 
     public async Task<MarketOrderModel> MarketBuyAsync(string tickerName, decimal quantity)
     {
@@ -221,7 +164,7 @@ public class CoinSpotExchangeService(
         try
         {
             logger.LogInformation("Saving log");
-            return await strategyLogRepository.SaveLog(new StrategyLogDto(log.StrategyName, log.Message, log.Timestamp));
+            return await strategyLogRepository.SaveLog(new StrategyLogDto(log.StrategyName, log.Message, log.Timestamp.DateTime));
         }
         catch (Exception e)
         {
@@ -265,7 +208,7 @@ public class CoinSpotExchangeService(
         try
         {
             logger.LogInformation("Saving daily returns");
-            var dtos = previousDayReturns.Select(b => new ReturnDto(b.Key, Exchange, ReturnType.Daily, timeProvider.GetUtcNow(), b.Value)).ToList() ?? [];
+            var dtos = previousDayReturns.Select(b => new ReturnDto(b.Key, Exchange, ReturnType.Daily, timeProvider.GetUtcNow().DateTime, b.Value)).ToList() ?? [];
             return await returnRepository.SaveReturns(dtos);
         }
         catch (Exception e)

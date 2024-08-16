@@ -10,7 +10,7 @@ public class StrategyLogDtoMappingExtensionTests
     public void MapToStrategyLogModel_WithValidDto_ReturnsModel()
     {
         // Arrange
-        var dto = new StrategyLogDto("TestStrategy", "TestMessage", DateTimeOffset.UtcNow);
+        var dto = new StrategyLogDto("TestStrategy", "TestMessage", DateTimeOffset.UtcNow.DateTime);
         
         // Act
         var model = dto.MapToStrategyLogModel();
@@ -55,9 +55,9 @@ public class StrategyLogDtoMappingExtensionTests
         // Arrange
         var dtos = new List<StrategyLogDto>
         {
-            new StrategyLogDto("TestStrategy1", "TestMessage1", DateTimeOffset.UtcNow),
-            new StrategyLogDto("TestStrategy2", "TestMessage2", DateTimeOffset.UtcNow),
-            new StrategyLogDto("TestStrategy3", "TestMessage3", DateTimeOffset.UtcNow)
+            new StrategyLogDto("TestStrategy1", "TestMessage1", DateTimeOffset.UtcNow.DateTime),
+            new StrategyLogDto("TestStrategy2", "TestMessage2", DateTimeOffset.UtcNow.DateTime),
+            new StrategyLogDto("TestStrategy3", "TestMessage3", DateTimeOffset.UtcNow.DateTime)
         };
         
         // Act

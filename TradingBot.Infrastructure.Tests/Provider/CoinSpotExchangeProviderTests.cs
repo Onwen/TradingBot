@@ -3,6 +3,7 @@ using Moq;
 using TradingBot.Domain.API.CoinSpotAPI;
 using TradingBot.Domain.API.CoinSpotAPI.Request;
 using TradingBot.Domain.API.CoinSpotAPI.Response;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Model;
 using TradingBot.Domain.TimeProvider;
 using TradingBot.Infrastructure.Provider;
@@ -33,18 +34,18 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         _coinSpotApi.Setup(x => x.GetLatestPrices(It.IsAny<GetLatestPricesRequest>())).ReturnsAsync(response);
 
         // Act
-        var result = await _coinSpotExchangeProvider.GetTicker("BTC");
+        var result = await _coinSpotExchangeProvider.GetTicker(Coin.BTC);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("BTC", result.Name);
+        Assert.Equal(Coin.BTC, result.Name);
         Assert.Equal(1, result.Bid);
         Assert.Equal(2, result.Ask);
         Assert.Equal(3, result.Last);
@@ -62,7 +63,7 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.GetLatestPrices(It.IsAny<GetLatestPricesRequest>())).ReturnsAsync(response);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.GetTicker("BTC"));
+        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.GetTicker(Coin.BTC));
     }
 
     #endregion
@@ -77,8 +78,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         _coinSpotApi.Setup(x => x.GetLatestPrices(It.IsAny<GetLatestPricesRequest>())).ReturnsAsync(response);
@@ -89,11 +90,11 @@ public class CoinSpotExchangeProviderTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(1, result[0].Bid);
         Assert.Equal(2, result[0].Ask);
         Assert.Equal(3, result[0].Last);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(4, result[1].Bid);
         Assert.Equal(5, result[1].Ask);
         Assert.Equal(6, result[1].Last);
@@ -126,8 +127,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -144,7 +145,7 @@ public class CoinSpotExchangeProviderTests
         var response = new PlaceMarketBuyOrderResponse()
         {
             Status = "ok",
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Amount = 1,
             Market = "BTC/AUD",
             Rate = 1,
@@ -155,13 +156,13 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.PlaceMarketBuyOrder(It.IsAny<PlaceMarketBuyOrderRequest>())).ReturnsAsync(response);
 
         // Act
-        var result = await _coinSpotExchangeProvider.MarketBuy("BTC", 1);
+        var result = await _coinSpotExchangeProvider.MarketBuy(Coin.BTC, 1);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("CoinSpot", result.Exchange);
         Assert.Equal("BUY", result.OrderType);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Equal("BTC/AUD", result.Market);
         Assert.Equal(1, result.Rate);
@@ -177,8 +178,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -201,7 +202,7 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.PlaceMarketBuyOrder(It.IsAny<PlaceMarketBuyOrderRequest>())).ReturnsAsync(placeMarketBuyOrderResponse);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketBuy("BTC", 1));
+        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketBuy(Coin.BTC, 1));
     }
     // Add buy failed test due to insufficient balance
     [Fact]
@@ -213,8 +214,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -232,7 +233,7 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.GetMyBalances(It.IsAny<GetMyBalancesRequest>())).ReturnsAsync(getMyBalancesResponse);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketBuy("BTC", 2));
+        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketBuy(Coin.BTC, 2));
     }
     #endregion
     #region MarketSell
@@ -245,8 +246,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -256,14 +257,14 @@ public class CoinSpotExchangeProviderTests
             [
                 new()
                 {
-                    { "BTC", new BalanceDetail() { Balance = 1 } }
+                    { Coin.BTC, new BalanceDetail() { Balance = 1 } }
                 }
             ]
         };
         var response = new PlaceMarketSellOrderResponse()
         {
             Status = "ok",
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Amount = 1,
             Market = "BTC/AUD",
             Rate = 1,
@@ -274,13 +275,13 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.PlaceMarketSellOrder(It.IsAny<PlaceMarketSellOrderRequest>())).ReturnsAsync(response);
 
         // Act
-        var result = await _coinSpotExchangeProvider.MarketSell("BTC", 1);
+        var result = await _coinSpotExchangeProvider.MarketSell(Coin.BTC, 1);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("CoinSpot", result.Exchange);
         Assert.Equal("SELL", result.OrderType);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Equal("BTC/AUD", result.Market);
         Assert.Equal(1, result.Rate);
@@ -296,8 +297,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -307,7 +308,7 @@ public class CoinSpotExchangeProviderTests
             [
                 new()
                 {
-                    { "BTC", new BalanceDetail() { Balance = 1 } }
+                    { Coin.BTC, new BalanceDetail() { Balance = 1 } }
                 }
             ]
         };
@@ -320,7 +321,7 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.PlaceMarketSellOrder(It.IsAny<PlaceMarketSellOrderRequest>())).ReturnsAsync(response);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketSell("BTC", 1));
+        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketSell(Coin.BTC, 1));
     }
     // Add sell failed test due to insufficient balance
     [Fact]
@@ -332,8 +333,8 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             Prices = new Dictionary<string, PriceDetail>()
             {
-                {"BTC", new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
-                {"ETH", new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
+                {Coin.BTC, new PriceDetail() {Bid = "1", Ask = "2", Last = "3"}},
+                {Coin.ETH, new PriceDetail() {Bid = "4", Ask = "5", Last = "6"}}
             }
         };
         var getMyBalancesResponse = new GetMyBalancesResponse()
@@ -343,7 +344,7 @@ public class CoinSpotExchangeProviderTests
             [
                 new()
                 {
-                    { "BTC", new BalanceDetail() { Balance = 1 } }
+                    { Coin.BTC, new BalanceDetail() { Balance = 1 } }
                 }
             ]
         };
@@ -351,7 +352,7 @@ public class CoinSpotExchangeProviderTests
         _coinSpotApi.Setup(x => x.GetMyBalances(It.IsAny<GetMyBalancesRequest>())).ReturnsAsync(getMyBalancesResponse);
 
         // Act
-        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketSell("BTC", 2));
+        await Assert.ThrowsAsync<Exception>(() => _coinSpotExchangeProvider.MarketSell(Coin.BTC, 2));
     }
     #endregion
     #region GetCompletedMarketOrders
@@ -366,13 +367,13 @@ public class CoinSpotExchangeProviderTests
             Status = "ok",
             BuyOrders = new List<Order>()
             {
-                new() { Coin = "BTC", Amount = 1, Rate = 1, Market = "BTC/AUD", Id = "1", SoldDate = now, AudGst = 1, AudFeeExGst = 1, AudTotal = 1 },
-                new() { Coin = "ETH", Amount = 2, Rate = 2, Market = "ETH/AUD", Id = "2", SoldDate = now, AudGst = 2, AudFeeExGst = 2, AudTotal = 2 }
+                new() { Coin = Coin.BTC, Amount = 1, Rate = 1, Market = "BTC/AUD", Id = "1", SoldDate = now, AudGst = 1, AudFeeExGst = 1, AudTotal = 1 },
+                new() { Coin = Coin.ETH, Amount = 2, Rate = 2, Market = "ETH/AUD", Id = "2", SoldDate = now, AudGst = 2, AudFeeExGst = 2, AudTotal = 2 }
             },
             SellOrders = new List<Order>()
             {
-                new() { Coin = "BTC", Amount = 1, Rate = 1, Market = "BTC/AUD", Id = "1", SoldDate = now, AudGst = 1, AudFeeExGst = 1, AudTotal = 1 },
-                new() { Coin = "ETH", Amount = 2, Rate = 2, Market = "ETH/AUD", Id = "2", SoldDate = now, AudGst = 2, AudFeeExGst = 2, AudTotal = 2 }
+                new() { Coin = Coin.BTC, Amount = 1, Rate = 1, Market = "BTC/AUD", Id = "1", SoldDate = now, AudGst = 1, AudFeeExGst = 1, AudTotal = 1 },
+                new() { Coin = Coin.ETH, Amount = 2, Rate = 2, Market = "ETH/AUD", Id = "2", SoldDate = now, AudGst = 2, AudFeeExGst = 2, AudTotal = 2 }
             }
         };
         _coinSpotApi.Setup(x => x.GetCompletedMarketOrders(It.IsAny<GetCompletedMarketOrdersRequest>())).ReturnsAsync(response);
@@ -383,7 +384,7 @@ public class CoinSpotExchangeProviderTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(4, result.Count);
-        Assert.Equal("BTC", result[0].Coin);
+        Assert.Equal(Coin.BTC, result[0].Coin);
         Assert.Equal(1, result[0].Amount);
         Assert.Equal(1, result[0].Rate);
         Assert.Equal("BTC/AUD", result[0].Market);
@@ -393,7 +394,7 @@ public class CoinSpotExchangeProviderTests
         Assert.Equal(1, result[0].AudFeeExGst);
         Assert.Equal(1, result[0].AudTotal);
         Assert.Equal("BUY", result[0].OrderType);
-        Assert.Equal("ETH", result[3].Coin);
+        Assert.Equal(Coin.ETH, result[3].Coin);
         Assert.Equal(2, result[3].Amount);
         Assert.Equal(2, result[3].Rate);
         Assert.Equal("ETH/AUD", result[3].Market);
@@ -472,11 +473,11 @@ public class CoinSpotExchangeProviderTests
             [
                 new()
                 {
-                    { "BTC", new BalanceDetail() { Balance = 1 } }
+                    { Coin.BTC, new BalanceDetail() { Balance = 1 } }
                 },
                 new()
                 {
-                    { "ETH", new BalanceDetail() { Balance = 2 } }
+                    { Coin.ETH, new BalanceDetail() { Balance = 2 } }
                 }
             ]
         };
@@ -488,9 +489,9 @@ public class CoinSpotExchangeProviderTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(1, result[0].Quantity);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(2, result[1].Quantity);
     }
     

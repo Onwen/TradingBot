@@ -7,6 +7,7 @@ using TradingBot.Domain.Provider;
 using TradingBot.Domain.Repository.Order;
 using TradingBot.Domain.Repository.Position;
 using TradingBot.Domain.Repository.PositionTargetWeighting;
+using TradingBot.Domain.Repository.PriceHistory;
 using TradingBot.Domain.Repository.Return;
 using TradingBot.Domain.Repository.StrategyLog;
 using TradingBot.Domain.Repository.Ticker;
@@ -24,6 +25,7 @@ public class CoinSpotExchangeServiceTests
     private readonly Mock<IPositionTargetWeightingRepository> _mockPositionTargetWeightingRepository;
     private readonly Mock<IReturnRepository> _mockReturnRepository;
     private readonly Mock<IOrderRepository> _mockOrderRepository;
+    private readonly Mock<IPriceHistoryRepository> _mockPriceHistoryRepository;
     private readonly Mock<IExchangeProvider> _mockExchangeProvider;
     private readonly TimeProvider _timeProvider;
     private readonly Mock<ILogger<CoinSpotExchangeService>> _mockLogger;
@@ -37,230 +39,13 @@ public class CoinSpotExchangeServiceTests
         _mockPositionTargetWeightingRepository = new Mock<IPositionTargetWeightingRepository>();
         _mockReturnRepository = new Mock<IReturnRepository>();
         _mockOrderRepository = new Mock<IOrderRepository>();
+        _mockPriceHistoryRepository = new Mock<IPriceHistoryRepository>();
         _mockExchangeProvider = new Mock<IExchangeProvider>();
         _timeProvider = new StaticTimeProvider(now);
         _mockLogger = new Mock<ILogger<CoinSpotExchangeService>>();
-        _coinSpotExchangeService = new CoinSpotExchangeService(_mockPositionRepository.Object, _mockTickerRepository.Object, _mockStrategyLogRepository.Object, _mockPositionTargetWeightingRepository.Object, _mockReturnRepository.Object, _mockOrderRepository.Object, _mockExchangeProvider.Object, _timeProvider, _mockLogger.Object);
+        _coinSpotExchangeService = new CoinSpotExchangeService(_mockPositionRepository.Object, _mockTickerRepository.Object, _mockStrategyLogRepository.Object, _mockPositionTargetWeightingRepository.Object, _mockReturnRepository.Object, _mockOrderRepository.Object, _mockPriceHistoryRepository.Object, _mockExchangeProvider.Object, _timeProvider, _mockLogger.Object);
     }
     
-    #region GetPriceSnapshotsAsync
-    [Fact]
-    public async void GetTickersAsync_Success()
-    {
-        // Arrange
-        var tickers = new List<PriceSnapshotModel>
-        {
-            new() { Name = "BTC", Currency = Currency.AUD, Ask = 1000, Bid = 1001, Last = 1002 },
-            new() { Name = "ETH", Currency = Currency.AUD, Ask = 2000, Bid = 2001, Last = 2002 },
-            new() { Name = "XRP", Currency = Currency.AUD, Ask = 3000, Bid = 3001, Last = 3002 }
-        };
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(tickers);
-        _mockTickerRepository.Setup(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>())).Returns(true);
-        // Act
-        var result = await _coinSpotExchangeService.GetPriceSnapshotsAsync();
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(3, result.Count);
-        Assert.Equal("BTC", result[0].Name);
-        Assert.Equal("ETH", result[1].Name);
-        Assert.Equal("XRP", result[2].Name);
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Once);
-    }
-    // Where exchange provider returns empty list we should not throw error and not call SavePriceSnapshots
-    [Fact]
-    public async void GetTickersAsync_EmptyList()
-    {
-        // Arrange
-        var tickers = new List<PriceSnapshotModel>();
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(tickers);
-        // Act
-        var result = await _coinSpotExchangeService.GetPriceSnapshotsAsync();
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Never);
-    }
-    
-    // Where exchange provider throws exception we should throw error and not call SavePriceSnapshots
-    [Fact]
-    public async void GetTickersAsync_ExchangeProviderThrowsException()
-    {
-        // Arrange
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(() => throw new Exception());
-        // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.GetPriceSnapshotsAsync());
-        // Assert
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Never);
-    }
-    
-    [Fact]
-    public async void GetTickersAsync_RepositoryFails()
-    {
-        // Arrange
-        var tickers = new List<PriceSnapshotModel>
-        {
-            new() { Name = "BTC", Currency = Currency.AUD, Ask = 1000, Bid = 1001, Last = 1002 },
-            new() { Name = "ETH", Currency = Currency.AUD, Ask = 2000, Bid = 2001, Last = 2002 },
-            new() { Name = "XRP", Currency = Currency.AUD, Ask = 3000, Bid = 3001, Last = 3002 }
-        };
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(tickers);
-        _mockTickerRepository.Setup(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>())).Returns(false);
-        // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.GetPriceSnapshotsAsync());
-        // Assert
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Once);
-    }
-    #endregion
-    #region GetPortfoliosAsync
-    // Test GetPortfoliosAsync
-    [Fact]
-    public async void GetPortfoliosAsync_Success()
-    {
-        // Arrange
-        var priceSnapshots = new List<PriceSnapshotModel>
-        {
-            new() { Name = "BTC", Currency = Currency.AUD, Ask = 1000, Bid = 1001, Last = 1002 },
-            new() { Name = "ETH", Currency = Currency.AUD, Ask = 2000, Bid = 2001, Last = 2002 },
-            new() { Name = "XRP", Currency = Currency.AUD, Ask = 3000, Bid = 3001, Last = 3002 }
-        };
-        var positions = new List<PositionModel>
-        {
-            new(now) { Name = "BTC", Quantity = 1 },
-            new(now) { Name = "ETH", Quantity = 2 },
-            new(now) { Name = "XRP", Quantity = 3 }
-        };
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(priceSnapshots);
-        _mockTickerRepository.Setup(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>())).Returns(true);
-        _mockExchangeProvider.Setup(x => x.GetPortfolio()).ReturnsAsync(positions);
-        _mockPositionRepository.Setup(x => x.SavePositions(It.IsAny<string>(), It.IsAny<List<PositionDto>>())).Returns(true);
-        // Act
-        var result = await _coinSpotExchangeService.GetPortfoliosAsync();
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(3, result.Positions.Count);
-        Assert.Equal(14012, result.TotalValue);
-        Assert.Equal("BTC", result.Positions[0].Name);
-        Assert.Equal("ETH", result.Positions[1].Name);
-        Assert.Equal("XRP", result.Positions[2].Name);
-        Assert.Equal(now, result.Positions[0].Timestamp);
-        Assert.Equal(now, result.Positions[1].Timestamp);
-        Assert.Equal(now, result.Positions[2].Timestamp);
-
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Once);
-        _mockExchangeProvider.Verify(x => x.GetPortfolio(), Times.Once);
-        _mockPositionRepository.Verify(x => x.SavePositions(It.IsAny<string>(), It.IsAny<List<PositionDto>>()), Times.Once);
-    }
-    
-    [Fact]
-    public async void GetPortfoliosAsync_ExchangeProviderThrowsException()
-    {
-        // Arrange
-        _mockExchangeProvider.Setup(x => x.GetPortfolio()).ReturnsAsync(() => throw new Exception());
-        // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.GetPortfoliosAsync());
-        // Assert
-        _mockExchangeProvider.Verify(x => x.GetPortfolio(), Times.Once);
-        _mockPositionRepository.Verify(x => x.SavePositions(It.IsAny<string>(), It.IsAny<List<PositionDto>>()), Times.Never);
-    }
-    
-    [Fact]
-    public async void GetPortfoliosAsync_RepositoryFails()
-    {
-        // Arrange
-        var priceSnapshots = new List<PriceSnapshotModel>
-        {
-            new() { Name = "BTC", Currency = Currency.AUD, Ask = 1000, Bid = 1001, Last = 1002 },
-            new() { Name = "ETH", Currency = Currency.AUD, Ask = 2000, Bid = 2001, Last = 2002 },
-            new() { Name = "XRP", Currency = Currency.AUD, Ask = 3000, Bid = 3001, Last = 3002 }
-        };
-        var positions = new List<PositionModel>
-        {
-            new(now) { Name = "BTC", Quantity = 1 },
-            new(now) { Name = "ETH", Quantity = 2 },
-            new(now) { Name = "XRP", Quantity = 3 }
-        };
-        _mockExchangeProvider.Setup(x => x.GetPriceSnapshots()).ReturnsAsync(priceSnapshots);
-        _mockTickerRepository.Setup(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>())).Returns(true);
-        _mockExchangeProvider.Setup(x => x.GetPortfolio()).ReturnsAsync(positions);
-        _mockPositionRepository.Setup(x => x.SavePositions(It.IsAny<string>(), It.IsAny<List<PositionDto>>())).Returns(false);
-        // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.GetPortfoliosAsync());
-        // Assert
-        _mockExchangeProvider.Verify(x => x.GetPriceSnapshots(), Times.Once);
-        _mockTickerRepository.Verify(x => x.SavePriceSnapshots(It.IsAny<List<PriceSnapshotDto>>()), Times.Once);
-        _mockExchangeProvider.Verify(x => x.GetPortfolio(), Times.Once);
-        _mockPositionRepository.Verify(x => x.SavePositions(It.IsAny<string>(), It.IsAny<List<PositionDto>>()), Times.Once);
-    }
-    #endregion
-    #region GetDailyPricesAsync
-    // Test GetDailyPricesAsync
-    [Fact]
-    public async void GetDailyPricesAsync_Success()
-    {
-        // Arrange
-        var prices = new List<PriceSnapshotDto>
-        {
-            new(Exchange, "BTC", Currency.AUD, 10000, 10001, 10000.5m, DateTimeOffset.UtcNow),
-            new(Exchange, "ETH", Currency.AUD, 500, 501, 500.5m, DateTimeOffset.UtcNow)
-        };
-        _mockTickerRepository.Setup(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>())).ReturnsAsync(prices);
-        // Act
-        var result = await _coinSpotExchangeService.GetDailyPricesAsync(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow);
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-        Assert.Equal(Exchange, result[0].Exchange);
-        Assert.Equal("BTC", result[0].Name);
-        Assert.Equal(Exchange, result[1].Exchange);
-        Assert.Equal("ETH", result[1].Name);
-        _mockTickerRepository.Verify(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>()), Times.Once);
-    }
-    // Where repository throws exception we should throw error
-    [Fact]
-    public async void GetDailyPricesAsync_RepositoryThrowsException()
-    {
-        // Arrange
-        _mockTickerRepository.Setup(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>())).ReturnsAsync(() => throw new Exception());
-        // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.GetDailyPricesAsync(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow));
-        // Assert
-        _mockTickerRepository.Verify(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>()), Times.Once);
-    }
-    // Where repository returns empty list we should not throw error
-    [Fact]
-    public async void GetDailyPricesAsync_EmptyList()
-    {
-        // Arrange
-        var prices = new List<PriceSnapshotDto>();
-        _mockTickerRepository.Setup(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>())).ReturnsAsync(prices);
-        // Act
-        var result =
-            await _coinSpotExchangeService.GetDailyPricesAsync(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow);
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-        _mockTickerRepository.Verify(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>()), Times.Once);
-    }
-    // Where repository returns null we should not throw error
-    [Fact]
-    public async void GetDailyPricesAsync_NullList()
-    {
-        // Arrange
-        List<PriceSnapshotDto> prices = null;
-        _mockTickerRepository.Setup(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>())).ReturnsAsync(prices);
-        // Act
-        var result = await _coinSpotExchangeService.GetDailyPricesAsync(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow);
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
-        _mockTickerRepository.Verify(x => x.GetDailyPrices(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>()), Times.Once);
-    }
-    #endregion
     #region MarketBuyAsync
     [Fact]
     public async void BuyAsync_Success()
@@ -269,7 +54,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -297,10 +82,10 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.GetCompletedMarketOrders()).ReturnsAsync([completedOrder]);
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(true);
         // Act
-        var result = await _coinSpotExchangeService.MarketBuyAsync("BTC", 1);
+        var result = await _coinSpotExchangeService.MarketBuyAsync(Coin.BTC, 1);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Equal(now, result.SoldDate);
         Assert.Equal(1, result.Total);
@@ -318,7 +103,7 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         _mockExchangeProvider.Setup(x => x.MarketBuy(It.IsAny<string>(), It.IsAny<decimal>())).ReturnsAsync(() => throw new Exception());
         // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketBuyAsync("BTC", 1));
+        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketBuyAsync(Coin.BTC, 1));
         // Assert
         _mockExchangeProvider.Verify(x => x.MarketBuy(It.IsAny<string>(), It.IsAny<decimal>()), Times.Once);
         _mockPositionRepository.Verify(x => x.SavePosition(It.IsAny<string>(), It.IsAny<PositionDto>()), Times.Never);
@@ -331,7 +116,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -342,7 +127,7 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.MarketBuy(It.IsAny<string>(), It.IsAny<decimal>())).ReturnsAsync(order);
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(false);
         // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketBuyAsync("BTC", 1));
+        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketBuyAsync(Coin.BTC, 1));
         // Assert
         _mockExchangeProvider.Verify(x => x.MarketBuy(It.IsAny<string>(), It.IsAny<decimal>()), Times.Once);
         _mockOrderRepository.Verify(x => x.SaveOrder(It.IsAny<OrderDto>()), Times.Once);
@@ -355,7 +140,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -367,10 +152,10 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.GetCompletedMarketOrders()).ReturnsAsync(new List<MarketOrderModel>());
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(true);
         // Act
-        var result = await _coinSpotExchangeService.MarketBuyAsync("BTC", 1);
+        var result = await _coinSpotExchangeService.MarketBuyAsync(Coin.BTC, 1);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Null(result.SoldDate);
         Assert.Null(result.Total);
@@ -390,7 +175,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -418,10 +203,10 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.GetCompletedMarketOrders()).ReturnsAsync([completedOrder]);
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(true);
         // Act
-        var result = await _coinSpotExchangeService.MarketSellAsync("BTC", 1);
+        var result = await _coinSpotExchangeService.MarketSellAsync(Coin.BTC, 1);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Equal(now, result.SoldDate);
         Assert.Equal(1, result.Total);
@@ -439,7 +224,7 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         _mockExchangeProvider.Setup(x => x.MarketSell(It.IsAny<string>(), It.IsAny<decimal>())).ReturnsAsync(() => throw new Exception());
         // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketSellAsync("BTC", 1));
+        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketSellAsync(Coin.BTC, 1));
         // Assert
         _mockExchangeProvider.Verify(x => x.MarketSell(It.IsAny<string>(), It.IsAny<decimal>()), Times.Once);
         _mockPositionRepository.Verify(x => x.SavePosition(It.IsAny<string>(), It.IsAny<PositionDto>()), Times.Never);
@@ -452,7 +237,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -463,7 +248,7 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.MarketSell(It.IsAny<string>(), It.IsAny<decimal>())).ReturnsAsync(order);
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(false);
         // Act
-        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketSellAsync("BTC", 1));
+        await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.MarketSellAsync(Coin.BTC, 1));
         // Assert
         _mockExchangeProvider.Verify(x => x.MarketSell(It.IsAny<string>(), It.IsAny<decimal>()), Times.Once);
         _mockOrderRepository.Verify(x => x.SaveOrder(It.IsAny<OrderDto>()), Times.Once);
@@ -476,7 +261,7 @@ public class CoinSpotExchangeServiceTests
         var order = new MarketOrderModel()
         {
             Amount = 1,
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Exchange = Exchange,
             Id = "12345678901234567890",
             Market = "BTC/AUD",
@@ -488,10 +273,10 @@ public class CoinSpotExchangeServiceTests
         _mockExchangeProvider.Setup(x => x.GetCompletedMarketOrders()).ReturnsAsync(new List<MarketOrderModel>());
         _mockOrderRepository.Setup(x => x.SaveOrder(It.IsAny<OrderDto>())).Returns(true);
         // Act
-        var result = await _coinSpotExchangeService.MarketSellAsync("BTC", 1);
+        var result = await _coinSpotExchangeService.MarketSellAsync(Coin.BTC, 1);
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal(1, result.Amount);
         Assert.Null(result.SoldDate);
         Assert.Null(result.Total);
@@ -681,8 +466,8 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         var positionTargetWeightings = new List<PositionTargetWeightingDto>
         {
-            new(Exchange,"BTC", 0.5m, DateTimeOffset.UtcNow),
-            new(Exchange,"ETH", 0.3m, DateTimeOffset.UtcNow)
+            new(Exchange,Coin.BTC, 0.5m, DateTimeOffset.UtcNow.DateTime),
+            new(Exchange,Coin.ETH, 0.3m, DateTimeOffset.UtcNow.DateTime)
         };
         _mockPositionTargetWeightingRepository.Setup(x => x.GetLatestWeightings()).ReturnsAsync(positionTargetWeightings);
         // Act
@@ -690,9 +475,9 @@ public class CoinSpotExchangeServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(0.5m, result[0].TargetWeighting);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(0.3m, result[1].TargetWeighting);
         _mockPositionTargetWeightingRepository.Verify(x => x.GetLatestWeightings(), Times.Once);
     }
@@ -742,7 +527,7 @@ public class CoinSpotExchangeServiceTests
     public async void SaveTargetWeightingAsync_Success()
     {
         // Arrange
-        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = "BTC", TargetWeighting = 0.5m }];
+        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = Coin.BTC, TargetWeighting = 0.5m }];
         _mockPositionTargetWeightingRepository.Setup(x => x.SaveWeightings(It.IsAny<List<PositionTargetWeightingDto>>())).ReturnsAsync(true);
         // Act
         var result = await _coinSpotExchangeService.SavePositionTargetWeightingsAsync(positionTargetWeightings);
@@ -755,7 +540,7 @@ public class CoinSpotExchangeServiceTests
     public async void SaveTargetWeightingAsync_RepositoryThrowsException()
     {
         // Arrange
-        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = "BTC", TargetWeighting = 0.5m }];
+        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = Coin.BTC, TargetWeighting = 0.5m }];
         _mockPositionTargetWeightingRepository.Setup(x => x.SaveWeightings(It.IsAny<List<PositionTargetWeightingDto>>())).ReturnsAsync(() => throw new Exception());
         // Act
         await Assert.ThrowsAnyAsync<Exception>(() => _coinSpotExchangeService.SavePositionTargetWeightingsAsync(positionTargetWeightings));
@@ -767,7 +552,7 @@ public class CoinSpotExchangeServiceTests
     public async void SaveTargetWeightingAsync_Fails()
     {
         // Arrange
-        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = "BTC", TargetWeighting = 0.5m }];
+        List<PositionTargetWeightingModel> positionTargetWeightings = [new PositionTargetWeightingModel(now) { Name = Coin.BTC, TargetWeighting = 0.5m }];
         _mockPositionTargetWeightingRepository.Setup(x => x.SaveWeightings(It.IsAny<List<PositionTargetWeightingDto>>())).ReturnsAsync(false);
         // Act
         var result = await _coinSpotExchangeService.SavePositionTargetWeightingsAsync(positionTargetWeightings);
@@ -786,8 +571,8 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         var previousDayReturns = new Dictionary<string, decimal>
         {
-            {"BTC", 0.5m},
-            {"ETH", 0.3m}
+            {Coin.BTC, 0.5m},
+            {Coin.ETH, 0.3m}
         };
         _mockReturnRepository.Setup(x => x.SaveReturns(It.IsAny<List<ReturnDto>>())).ReturnsAsync(true);
         // Act
@@ -803,8 +588,8 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         var previousDayReturns = new Dictionary<string, decimal>
         {
-            {"BTC", 0.5m},
-            {"ETH", 0.3m}
+            {Coin.BTC, 0.5m},
+            {Coin.ETH, 0.3m}
         };
         _mockReturnRepository.Setup(x => x.SaveReturns(It.IsAny<List<ReturnDto>>())).ReturnsAsync(() => throw new Exception());
         // Act
@@ -819,8 +604,8 @@ public class CoinSpotExchangeServiceTests
         // Arrange
         var previousDayReturns = new Dictionary<string, decimal>
         {
-            {"BTC", 0.5m},
-            {"ETH", 0.3m}
+            {Coin.BTC, 0.5m},
+            {Coin.ETH, 0.3m}
         };
         _mockReturnRepository.Setup(x => x.SaveReturns(It.IsAny<List<ReturnDto>>())).ReturnsAsync(false);
         // Act

@@ -4,6 +4,7 @@ using Moq.Protected;
 using Refit;
 using TradingBot.Domain.API.CoinSpotAPI;
 using TradingBot.Domain.API.CoinSpotAPI.Request;
+using TradingBot.Domain.Enum;
 
 namespace TradingBot.Domain.Tests.API;
 
@@ -71,20 +72,20 @@ public class CoinspotAPITests
         Assert.NotNull(response.Balances);
         Assert.Equal(response.Balances.Count, 3);
         Assert.True(response.Balances[0].ContainsKey("AUD"));
-        Assert.True(response.Balances[1].ContainsKey("BTC"));
-        Assert.True(response.Balances[2].ContainsKey("LTC"));
+        Assert.True(response.Balances[1].ContainsKey(Coin.BTC));
+        Assert.True(response.Balances[2].ContainsKey(Coin.LTC));
 
         var audBalance = response.Balances[0]["AUD"];
         Assert.Equal(1000.11m, audBalance.Balance);
         Assert.Equal(1000.11m, audBalance.AudBalance);
         Assert.Equal(1m, audBalance.Rate);
 
-        var btcBalance = response.Balances[1]["BTC"];
+        var btcBalance = response.Balances[1][Coin.BTC];
         Assert.Equal(1.1111111m, btcBalance.Balance);
         Assert.Equal(2222.22m, btcBalance.AudBalance);
         Assert.Equal(111111.11m, btcBalance.Rate);
 
-        var ltcBalance = response.Balances[2]["LTC"];
+        var ltcBalance = response.Balances[2][Coin.LTC];
         Assert.Equal(111.111111m, ltcBalance.Balance);
         Assert.Equal(22222.22m, ltcBalance.AudBalance);
         Assert.Equal(11.1111m, ltcBalance.Rate);
@@ -152,8 +153,8 @@ public class CoinspotAPITests
         Assert.NotNull(response.Prices);
         Assert.Equal(response.Prices.Count, 4);
         
-        Assert.True(response.Prices.ContainsKey("btc"));
-        var btcPrice = response.Prices["btc"];
+        Assert.True(response.Prices.ContainsKey(Coin.BTC.ToLower()));
+        var btcPrice = response.Prices[Coin.BTC.ToLower()];
         Assert.Equal("102000", btcPrice.Bid);
         Assert.Equal("102374.28895123", btcPrice.Ask);
         Assert.Equal("102200", btcPrice.Last);
@@ -163,14 +164,14 @@ public class CoinspotAPITests
         Assert.Equal("11111", btcUsdtPrice.Bid);
         Assert.Equal("222222", btcUsdtPrice.Ask);
         
-        Assert.True(response.Prices.ContainsKey("ltc"));
-        var ltcPrice = response.Prices["ltc"];
+        Assert.True(response.Prices.ContainsKey(Coin.LTC.ToLower()));
+        var ltcPrice = response.Prices[Coin.LTC.ToLower()];
         Assert.Equal("1.11111", ltcPrice.Bid);
         Assert.Equal("111", ltcPrice.Ask);
         Assert.Equal("111", ltcPrice.Last);
         
-        Assert.True(response.Prices.ContainsKey("doge"));
-        var dogePrice = response.Prices["doge"];
+        Assert.True(response.Prices.ContainsKey(Coin.DOGE.ToLower()));
+        var dogePrice = response.Prices[Coin.DOGE.ToLower()];
         Assert.Equal("1.111111", dogePrice.Bid);
         Assert.Equal("1.111111", dogePrice.Ask);
         Assert.Equal("1.11111", dogePrice.Last);
@@ -214,7 +215,7 @@ public class CoinspotAPITests
         var response = await apiClient.PlaceMarketBuyOrder(new ()
         {
             Amount = 1.234m,
-            CoinType = "BTC",
+            CoinType = Coin.BTC,
             MarketType = "AUD",
             Rate = 123.344m
             
@@ -224,7 +225,7 @@ public class CoinspotAPITests
         Assert.NotNull(response);
         Assert.Equal("ok", response.Status);
         Assert.Equal("ok", response.Message);
-        Assert.Equal("BTC", response.Coin);
+        Assert.Equal(Coin.BTC, response.Coin);
         Assert.Equal("BTC/AUD", response.Market);
         Assert.Equal(1.234m, response.Amount);
         Assert.Equal(123.344m, response.Rate);
@@ -274,7 +275,7 @@ public class CoinspotAPITests
         Assert.NotNull(response);
         Assert.Equal("ok", response.Status);
         Assert.Equal("ok", response.Message);
-        Assert.Equal("BTC", response.Coin);
+        Assert.Equal(Coin.BTC, response.Coin);
         Assert.Equal("BTC/AUD", response.Market);
         Assert.Equal(1.234m, response.Amount);
         Assert.Equal(123.344m, response.Rate);
@@ -353,7 +354,7 @@ public class CoinspotAPITests
 
         var buyOrder = response.BuyOrders[0];
         Assert.Equal("12345678901234567890", buyOrder.Id);
-        Assert.Equal("BTC", buyOrder.Coin);
+        Assert.Equal(Coin.BTC, buyOrder.Coin);
         Assert.Equal("BTC/AUD", buyOrder.Market);
         Assert.Equal(1.234m, buyOrder.Amount);
         Assert.Equal(123.344m, buyOrder.Rate);
@@ -364,7 +365,7 @@ public class CoinspotAPITests
         
         var sellOrder = response.SellOrders[0];
         Assert.Equal("12345678901234567890", sellOrder.Id);
-        Assert.Equal("BTC", sellOrder.Coin);
+        Assert.Equal(Coin.BTC, sellOrder.Coin);
         Assert.Equal("BTC/AUD", sellOrder.Market);
         Assert.Equal(1.234m, sellOrder.Amount);
         Assert.Equal(123.344m, sellOrder.Rate);

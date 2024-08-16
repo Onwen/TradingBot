@@ -40,10 +40,10 @@ public class MarketOrderModelMappingExtensionTests
         Assert.Equal(model.Rate, result.Rate);
         Assert.Equal(model.Amount, result.Amount);
         Assert.Equal(model.Total, result.Total);
-        Assert.Equal(model.SoldDate, result.SoldDate);
+        Assert.Equal(model.SoldDate?.DateTime, result.SoldDate);
         Assert.Equal(model.AudFeeExGst, result.AudFeeExGst);
         Assert.Equal(model.AudGst, result.AudGst);
         Assert.Equal(model.AudTotal, result.AudTotal);
-        Assert.Equal(model.Timestamp, result.Timestamp);
+        Assert.Equal(model.Timestamp.DateTime, result.Timestamp);
     }
 }

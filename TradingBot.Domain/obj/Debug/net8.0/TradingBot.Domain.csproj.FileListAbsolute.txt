@@ -12,7 +12,6 @@ D:\Repos\TradingBot\TradingBot.Domain\obj\Debug\net8.0\refint\TradingBot.Domain.
 D:\Repos\TradingBot\TradingBot.Domain\obj\Debug\net8.0\TradingBot.Domain.pdb
 D:\Repos\TradingBot\TradingBot.Domain\obj\Debug\net8.0\ref\TradingBot.Domain.dll
 D:\Repos\TradingBot\TradingBot.Domain\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
-D:\Repos\TradingBot\TradingBot.Domain\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 D:\Repos\TradingBot\TradingBot.Domain\obj\Debug\net8.0\TradingB.F02F77BF.Up2Date
 D:\Repos\TradingBot\TradingBot.Domain\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
 D:\Repos\TradingBot\TradingBot.Domain\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll

@@ -14,7 +14,7 @@ public interface ICoinSpotApi
     Task<PlaceMarketSellOrderResponse> PlaceMarketSellOrder([Body]PlaceMarketSellOrderRequest request);
     [Post("/api/v2/my/buy")]
     Task<PlaceMarketBuyOrderResponse> PlaceMarketBuyOrder([Body]PlaceMarketBuyOrderRequest request);
-    [Post("/api/v2/my/orders/market/completed")]
+    [Post("/api/v2/ro/orders/market/completed")]
     Task<GetCompletedMarketOrdersResponse> GetCompletedMarketOrders([Body]GetCompletedMarketOrdersRequest request);
     [Post("/api/v2/my/sell/cancel")]
     Task<CancelMarketOrderResponse> CancelMarketSellOrder([Body]CancelMarketOrderRequest request);

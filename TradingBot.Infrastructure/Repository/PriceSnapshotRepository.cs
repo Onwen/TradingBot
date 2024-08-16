@@ -12,9 +12,15 @@ public class PriceSnapshotRepository(ApplicationDbContext dataContext, ILogger<P
         return dataContext.Tickers.Where(t => name.Contains(t.Name)).ToList();
     }
 
-    public async Task<List<PriceSnapshotDto>> GetDailyPrices(DateTimeOffset from, DateTimeOffset to)
+    public List<PriceSnapshotDto> GetPriceSnapshots(List<string> name, DateTimeOffset at)
     {
-        return await dataContext.GetEarliestAskPricesAsync(from, to);
+        logger.LogInformation("Getting tickers");
+        // select all tickers with the given name and the latest timestamp before the given timestamp
+        return dataContext.Tickers
+            .Where(t => name.Contains(t.Name) && t.Timestamp <= at)
+            .GroupBy(t => t.Name)
+            .Select(g => g.OrderByDescending(t => t.Timestamp).FirstOrDefault())
+            .ToList();
     }
 
     public bool SavePriceSnapshots(List<PriceSnapshotDto> tickers)

@@ -1,6 +1,6 @@
 namespace TradingBot.Domain.Repository.Return;
 
-public record ReturnDto(string Name, string Exchange, string ReturnType, DateTimeOffset Timestamp, decimal Value)
+public record ReturnDto(string Name, string Exchange, string ReturnType, DateTime Timestamp, decimal Value)
 {
     public int Id { get; init; }
 }

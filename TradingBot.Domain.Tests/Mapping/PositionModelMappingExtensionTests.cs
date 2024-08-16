@@ -1,3 +1,4 @@
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 using TradingBot.Domain.Model;
 
@@ -10,10 +11,10 @@ public class PositionModelMappingExtensionTests
     public void MapToPositionDto_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var positionModel = new PositionModel(now)
         {
-            Name = "BTC",
+            Name = Coin.BTC,
             Quantity = 1
         };
 
@@ -21,7 +22,7 @@ public class PositionModelMappingExtensionTests
         var result = positionModel.MapToPositionDto(now);
 
         // Assert
-        Assert.Equal("BTC", result.Ticker);
+        Assert.Equal(Coin.BTC, result.Ticker);
         Assert.Equal(1, result.Quantity);
         Assert.Equal(now, result.Timestamp);
     }
@@ -44,17 +45,17 @@ public class PositionModelMappingExtensionTests
     public void MapToPositionDto_List_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var positionModelList = new List<PositionModel>
         {
             new PositionModel(now)
             {
-                Name = "BTC",
+                Name = Coin.BTC,
                 Quantity = 1
             },
             new PositionModel(now)
             {
-                Name = "ETH",
+                Name = Coin.ETH,
                 Quantity = 2
             }
         };
@@ -64,10 +65,10 @@ public class PositionModelMappingExtensionTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Ticker);
+        Assert.Equal(Coin.BTC, result[0].Ticker);
         Assert.Equal(1, result[0].Quantity);
         Assert.Equal(now, result[0].Timestamp);
-        Assert.Equal("ETH", result[1].Ticker);
+        Assert.Equal(Coin.ETH, result[1].Ticker);
         Assert.Equal(2, result[1].Quantity);
         Assert.Equal(now, result[1].Timestamp);
     }
@@ -77,7 +78,7 @@ public class PositionModelMappingExtensionTests
     {
         // Arrange
         List<PositionModel> positionModelList = null;
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
 
         // Act
         var result = positionModelList.MapToPositionDto(now);
@@ -104,17 +105,17 @@ public class PositionModelMappingExtensionTests
     public void MapToPortfolioModel_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var positionModelList = new List<PositionModel>
         {
             new PositionModel(now)
             {
-                Name = "BTC",
+                Name = Coin.BTC,
                 Quantity = 1
             },
             new PositionModel(now)
             {
-                Name = "ETH",
+                Name = Coin.ETH,
                 Quantity = 2
             }
         };
@@ -122,12 +123,12 @@ public class PositionModelMappingExtensionTests
         {
             new PriceSnapshotModel
             {
-                Name = "BTC",
+                Name = Coin.BTC,
                 Last = 10000
             },
             new PriceSnapshotModel
             {
-                Name = "ETH",
+                Name = Coin.ETH,
                 Last = 500
             }
         };
@@ -140,11 +141,11 @@ public class PositionModelMappingExtensionTests
         Assert.Equal(exchange, result.Exchange);
         Assert.Equal(11000, result.TotalValue);
         Assert.Equal(2, result.Positions.Count);
-        Assert.Equal("BTC", result.Positions[0].Name);
+        Assert.Equal(Coin.BTC, result.Positions[0].Name);
         Assert.Equal(1, result.Positions[0].Quantity);
         Assert.Equal(10000, result.Positions[0].CurrentPrice);
         Assert.Equal(now, result.Positions[0].Timestamp);
-        Assert.Equal("ETH", result.Positions[1].Name);
+        Assert.Equal(Coin.ETH, result.Positions[1].Name);
         Assert.Equal(2, result.Positions[1].Quantity);
         Assert.Equal(500, result.Positions[1].CurrentPrice);
         Assert.Equal(now, result.Positions[1].Timestamp);

@@ -1,4 +1,5 @@
 using TradingBot.Domain.API.CoinSpotAPI.Response;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 
 namespace TradingBot.Domain.Tests.Mapping;
@@ -17,8 +18,8 @@ public class GetCompletedMarketOrdersResponseMappingExtensionTests
                 new Order
                 {
                     Id = "1",
-                    Coin = "BTC",
-                    Market = "AUD",
+                    Coin = Coin.BTC,
+                    Market = "aud",
                     Rate = 1000,
                     Amount = 1,
                     Total = 1000,
@@ -33,8 +34,8 @@ public class GetCompletedMarketOrdersResponseMappingExtensionTests
                 new Order
                 {
                     Id = "2",
-                    Coin = "BTC",
-                    Market = "AUD",
+                    Coin = Coin.BTC,
+                    Market = "aud",
                     Rate = 1000,
                     Amount = 1,
                     Total = 1000,
@@ -56,7 +57,7 @@ public class GetCompletedMarketOrdersResponseMappingExtensionTests
         Assert.NotNull(result[0]);
         Assert.Equal("exchange", result[0].Exchange);
         Assert.Equal("BUY", result[0].OrderType);
-        Assert.Equal("BTC", result[0].Coin);
+        Assert.Equal(Coin.BTC, result[0].Coin);
         Assert.Equal("AUD", result[0].Market);
         Assert.Equal(1, result[0].Amount);
         Assert.Equal(1000, result[0].Rate);
@@ -65,7 +66,7 @@ public class GetCompletedMarketOrdersResponseMappingExtensionTests
         Assert.NotNull(result[1]);
         Assert.Equal("exchange", result[1].Exchange);
         Assert.Equal("SELL", result[1].OrderType);
-        Assert.Equal("BTC", result[1].Coin);
+        Assert.Equal(Coin.BTC, result[1].Coin);
         Assert.Equal("AUD", result[1].Market);
         Assert.Equal(1, result[1].Amount);
         Assert.Equal(1000, result[1].Rate);

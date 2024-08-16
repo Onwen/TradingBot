@@ -8,7 +8,7 @@ public static class PositionModelMappingExtension
     // map position model to position dto
     public static PositionDto MapToPositionDto(this PositionModel position, DateTimeOffset utcNow)
     {
-        return position == null ? null : new PositionDto(position.Exchange, position.Name, position.Quantity, utcNow);
+        return position == null ? null : new PositionDto(position.Exchange, position.Name, position.Quantity, utcNow.DateTime);
     }
     // map list of position model to list of position dto
     public static List<PositionDto> MapToPositionDto(this List<PositionModel> positions, DateTimeOffset utcNow)
@@ -29,7 +29,7 @@ public static class PositionModelMappingExtension
             {
                 Name = b.Name,
                 Quantity = b.Quantity,
-                CurrentPrice = priceSnapshots.FirstOrDefault(p => p.Name == b.Name)?.Last ?? 0
+                CurrentPrice = priceSnapshots.FirstOrDefault(p => p.Name == b.Name)?.Last ?? b.CurrentPrice
             }).ToList()
         };
     }

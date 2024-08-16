@@ -18,7 +18,7 @@ public static class PositionTargetWeightingModelMappingExtension
             model.Exchange,
             model.Name,
             model.TargetWeighting,
-            model.Timestamp
+            model.Timestamp.DateTime
         );
     }
     

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TradingBot.Domain.Repository.Order;
 using TradingBot.Domain.Repository.Position;
 using TradingBot.Domain.Repository.PositionTargetWeighting;
+using TradingBot.Domain.Repository.PriceHistory;
 using TradingBot.Domain.Repository.Return;
 using TradingBot.Domain.Repository.StrategyLog;
 using TradingBot.Domain.Repository.Ticker;
@@ -62,6 +63,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             ))
             .ToListAsync();
     }
+    
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Configure composite key
+        modelBuilder.Entity<PriceHistoryDto>()
+            .HasKey(ph => new { ph.Name, ph.Symbol, ph.TimeOpen });
+        foreach (var property in modelBuilder.Model.GetEntityTypes()
+                     .SelectMany(t => t.GetProperties())
+                     .Where
+                     ( p
+                         => p.ClrType == typeof(DateTime) 
+                            || p.ClrType == typeof(DateTime?)
+                     )
+                )
+        {
+            property.SetColumnType("timestamp without time zone");
+        }
+
+        base.OnModelCreating(modelBuilder);
+    }
     public DbSet<PositionDto> Positions { get; set; }
     public DbSet<PriceSnapshotDto> Tickers { get; set; }
     public DbSet<TradeDto> Trades { get; set; }
@@ -69,4 +91,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PositionTargetWeightingDto> PositionTargetWeightings { get; set; }
     public DbSet<ReturnDto> Returns { get; set; }
     public DbSet<OrderDto> Orders { get; set; }
+    public DbSet<PriceHistoryDto> PriceHistory { get; set; }
 }

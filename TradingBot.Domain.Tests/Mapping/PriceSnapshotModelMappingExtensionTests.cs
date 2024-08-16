@@ -11,10 +11,10 @@ public class PriceSnapshotModelMappingExtensionTests
     public void MapToPriceSnapshotDto_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var tickerModel = new PriceSnapshotModel
         {
-            Name = "BTC",
+            Name = Coin.BTC,
             Ask = 1,
             Bid = 2,
             Last = 3
@@ -24,7 +24,7 @@ public class PriceSnapshotModelMappingExtensionTests
         var result = tickerModel.MapToPriceSnapshotDto(now);
 
         // Assert
-        Assert.Equal("BTC", result.Name);
+        Assert.Equal(Coin.BTC, result.Name);
         Assert.Equal(Currency.AUD, result.Currency);
         Assert.Equal(1, result.Ask);
         Assert.Equal(2, result.Bid);
@@ -50,19 +50,19 @@ public class PriceSnapshotModelMappingExtensionTests
     public void MapToPriceSnapshotDto_List_Success()
     {
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.DateTime;
         var tickerModelList = new List<PriceSnapshotModel>
         {
             new PriceSnapshotModel
             {
-                Name = "BTC",
+                Name = Coin.BTC,
                 Ask = 1,
                 Bid = 2,
                 Last = 3
             },
             new PriceSnapshotModel
             {
-                Name = "ETH",
+                Name = Coin.ETH,
                 Ask = 4,
                 Bid = 5,
                 Last = 6
@@ -74,13 +74,13 @@ public class PriceSnapshotModelMappingExtensionTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(Currency.AUD, result[0].Currency);
         Assert.Equal(1, result[0].Ask);
         Assert.Equal(2, result[0].Bid);
         Assert.Equal(3, result[0].Last);
         Assert.Equal(now, result[0].Timestamp);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(Currency.AUD, result[1].Currency);
         Assert.Equal(4, result[1].Ask);
         Assert.Equal(5, result[1].Bid);

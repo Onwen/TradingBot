@@ -1,4 +1,5 @@
 using TradingBot.Domain.API.CoinSpotAPI.Response;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 
 namespace TradingBot.Domain.Tests.Mapping;
@@ -12,10 +13,10 @@ public class PlaceMarketBuyOrderResponseMappingExtensionTests
         // Arrange
         var response = new PlaceMarketBuyOrderResponse
         {
-            Coin = "BTC",
+            Coin = Coin.BTC,
             Amount = 1,
             Rate = 1,
-            Market = "AUD",
+            Market = "aud",
             
         };
         var exchange = "exchange";
@@ -27,7 +28,7 @@ public class PlaceMarketBuyOrderResponseMappingExtensionTests
         // Assert
         Assert.Equal("exchange", result.Exchange);
         Assert.Equal("BUY", result.OrderType);
-        Assert.Equal("BTC", result.Coin);
+        Assert.Equal(Coin.BTC, result.Coin);
         Assert.Equal("AUD", result.Market);
         Assert.Equal(1, result.Amount);
         Assert.Equal(1, result.Rate);

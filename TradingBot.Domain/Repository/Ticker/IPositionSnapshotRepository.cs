@@ -2,7 +2,6 @@
 
 public interface IPositionSnapshotRepository
 {
-    Task<List<PriceSnapshotDto>> GetDailyPrices(DateTimeOffset from, DateTimeOffset to);
-    List<PriceSnapshotDto> GetPriceSnapshots(List<string> name);
+    List<PriceSnapshotDto> GetPriceSnapshots(List<string> name, DateTimeOffset at);
     bool SavePriceSnapshots(List<PriceSnapshotDto> tickers);
 }

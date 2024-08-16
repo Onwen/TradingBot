@@ -290,3 +290,5 @@ __pycache__/
 /TradingBot.Worker/Migrations
 TradingBot.Worker/appsettings.Development.json
 TradingBot.Worker/appsettings.json
+TradingBot.Api/appsettings.json
+TradingBot.Api/appsettings.Development.json

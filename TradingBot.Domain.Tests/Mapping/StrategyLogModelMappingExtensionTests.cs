@@ -19,7 +19,7 @@ public class StrategyLogModelMappingExtensionTests
         Assert.NotNull(dto);
         Assert.Equal(model.StrategyName, dto.StrategyName);
         Assert.Equal(model.Message, dto.Message);
-        Assert.Equal(model.Timestamp, dto.Timestamp);
+        Assert.Equal(model.Timestamp.DateTime, dto.Timestamp);
     }
     // Test the MapToStrategyLogDto method with a null model
     [Fact]
@@ -71,7 +71,7 @@ public class StrategyLogModelMappingExtensionTests
         {
             Assert.Equal(models[i].StrategyName, dtos[i].StrategyName);
             Assert.Equal(models[i].Message, dtos[i].Message);
-            Assert.Equal(models[i].Timestamp, dtos[i].Timestamp);
+            Assert.Equal(models[i].Timestamp.DateTime, dtos[i].Timestamp);
         }
     }
 }

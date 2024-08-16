@@ -11,8 +11,8 @@ public static class PlaceMarketBuyOrderResponseMappingExtension
         {
             Exchange = exchange,
             OrderType = "BUY",
-            Coin = response.Coin,
-            Market = response.Market,
+            Coin = response.Coin.ToUpper(),
+            Market = response.Market.ToUpper(),
             Amount = response.Amount,
             Rate = response.Rate,
             Id = response.Id,

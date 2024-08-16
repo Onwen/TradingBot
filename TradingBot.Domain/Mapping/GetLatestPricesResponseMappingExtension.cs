@@ -23,7 +23,7 @@ public static class GetLatestPricesResponseMappingExtension
             var ticker = new PriceSnapshotModel
             {
                 Exchange = exchange,
-                Name = item.Key,
+                Name = item.Key.ToUpper(),
                 Ask = decimal.TryParse(item.Value.Ask, out var askOut) ? askOut : 0,
                 Bid = decimal.TryParse(item.Value.Bid, out var bidOut) ? bidOut : 0,
                 Last = decimal.TryParse(item.Value.Last, out var lastOut) ? lastOut : 0

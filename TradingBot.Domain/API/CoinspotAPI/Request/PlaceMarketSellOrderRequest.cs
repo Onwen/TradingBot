@@ -1,17 +1,21 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using TradingBot.Domain.API.CoinspotAPI.Converter;
 
 namespace TradingBot.Domain.API.CoinSpotAPI.Request;
 
 public class PlaceMarketSellOrderRequest : BaseRequest
 {
-    [JsonProperty(PropertyName = "cointype")]
+    [JsonPropertyName("cointype")]
     public string CoinType { get; set; } = string.Empty;
 
-    [JsonProperty(PropertyName = "amount")]
+    [JsonPropertyName("amount")]
+    [JsonConverter(typeof(DecimalTo8PlacesConverter))]
     public decimal Amount { get; set; }
 
-    [JsonProperty(PropertyName = "rate")] public decimal Rate { get; set; }
+    [JsonPropertyName("rate")]
+    [JsonConverter(typeof(DecimalTo8PlacesConverter))]
+    public decimal Rate { get; set; }
 
-    [JsonProperty(PropertyName = "markettype")]
+    [JsonPropertyName("markettype")]
     public string MarketType { get; set; } = "AUD";
 }

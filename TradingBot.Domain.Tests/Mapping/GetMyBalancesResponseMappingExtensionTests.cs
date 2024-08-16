@@ -1,4 +1,5 @@
 using TradingBot.Domain.API.CoinSpotAPI.Response;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 
 namespace TradingBot.Domain.Tests.Mapping;
@@ -19,7 +20,7 @@ public class GetMyBalancesResponseMappingExtensionTests
                 new Dictionary<string, BalanceDetail>()
                 {
                     {
-                        "BTC", new()
+                        Coin.BTC, new()
                         {
                             Balance = 1
                         }
@@ -28,7 +29,7 @@ public class GetMyBalancesResponseMappingExtensionTests
                 new Dictionary<string, BalanceDetail>()
                 {
                     {
-                        "ETH", new()
+                        Coin.ETH, new()
                         {
                             Balance = 2
                         }
@@ -43,11 +44,11 @@ public class GetMyBalancesResponseMappingExtensionTests
         // Assert
         Assert.Equal(2, result.Count);
         Assert.Equal(TestExchange, result[0].Exchange);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(1, result[0].Quantity);
         Assert.Equal(now, result[0].Timestamp);
         Assert.Equal(TestExchange, result[1].Exchange);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(2, result[1].Quantity);
         Assert.Equal(now, result[1].Timestamp);
     }

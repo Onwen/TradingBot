@@ -13,7 +13,7 @@ public static class PriceSnapshotModelMappingExtension
         {
             return null;
         }
-        return new PriceSnapshotDto(priceSnapshot.Exchange, priceSnapshot.Name, Currency.AUD,priceSnapshot.Bid, priceSnapshot.Ask, priceSnapshot.Last, utcNow);
+        return new PriceSnapshotDto(priceSnapshot.Exchange, priceSnapshot.Name, Currency.AUD,priceSnapshot.Bid, priceSnapshot.Ask, priceSnapshot.Last, utcNow.DateTime);
     }
     // map list of price snapshot model to list of price snapshot dto
     public static List<PriceSnapshotDto> MapToPriceSnapshotDto(this List<PriceSnapshotModel> tickers, DateTimeOffset utcNow)

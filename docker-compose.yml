@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:13
+    container_name: my_postgres_db
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - pg_network
+    command: ["postgres"]
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com # Set your default email
+      PGADMIN_DEFAULT_PASSWORD: admin # Set your default password
+    ports:
+      - "5050:80" # Map port 5050 on your host to port 80 in the container
+    networks:
+      - pg_network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # Persist data
+
+volumes:
+  db-data:
+  pgadmin_data:
+
+networks:
+  pg_network:

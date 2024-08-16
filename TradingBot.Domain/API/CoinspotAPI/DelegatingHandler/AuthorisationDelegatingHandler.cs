@@ -13,7 +13,7 @@ public class AuthorisationDelegatingHandler(IOptions<CoinspotApiSettings> option
         logger.LogInformation("Authorising request");
         var nonce = DateTime.Now.Ticks;
         var msg = request.Content?.ReadAsStringAsync(cancellationToken).Result;
-        var jsonMessage = msg?.Replace(BaseRequest.NoncePlaceholder, nonce.ToString()) ?? string.Empty;
+        var jsonMessage = msg?.Replace(BaseRequest.NoncePlaceholder, nonce.ToString()).ToLower() ?? string.Empty;
         logger.LogInformation("Request message: {jsonMessage}", jsonMessage);
         request.Content = new StringContent(jsonMessage, Encoding.UTF8, "application/json");
 

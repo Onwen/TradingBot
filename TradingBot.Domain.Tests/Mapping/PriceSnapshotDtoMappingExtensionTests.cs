@@ -12,7 +12,7 @@ public class PriceSnapshotDtoMappingExtensionTests
     public void MapToPriceSnapshotModel_WithValidDto_ReturnsModel()
     {
         // Arrange
-        var dto = new PriceSnapshotDto(Exchange, "BTC", Currency.AUD, 10000, 10001, 10000.5m, DateTimeOffset.UtcNow);
+        var dto = new PriceSnapshotDto(Exchange, Coin.BTC, Currency.AUD, 10000, 10001, 10000.5m, DateTimeOffset.UtcNow.DateTime);
         
         // Act
         var model = dto.MapToPriceSnapshotModel();
@@ -20,7 +20,7 @@ public class PriceSnapshotDtoMappingExtensionTests
         // Assert
         Assert.NotNull(model);
         Assert.Equal(Exchange, model.Exchange);
-        Assert.Equal("BTC", model.Name);
+        Assert.Equal(Coin.BTC, model.Name);
         Assert.Equal(Currency.AUD, model.Currency);
         Assert.Equal(10000, model.Bid);
         Assert.Equal(10001, model.Ask);
@@ -47,8 +47,8 @@ public class PriceSnapshotDtoMappingExtensionTests
         // Arrange
         var dtos = new List<PriceSnapshotDto>
         {
-            new PriceSnapshotDto(Exchange,"BTC", Currency.AUD, 10000, 10001, 10000.5m, DateTimeOffset.UtcNow),
-            new PriceSnapshotDto(Exchange,"ETH", Currency.AUD, 500, 501, 500.5m, DateTimeOffset.UtcNow)
+            new PriceSnapshotDto(Exchange,Coin.BTC, Currency.AUD, 10000, 10001, 10000.5m, DateTimeOffset.UtcNow.DateTime),
+            new PriceSnapshotDto(Exchange,Coin.ETH, Currency.AUD, 500, 501, 500.5m, DateTimeOffset.UtcNow.DateTime)
         };
         
         // Act
@@ -58,14 +58,14 @@ public class PriceSnapshotDtoMappingExtensionTests
         Assert.NotNull(models);
         Assert.Equal(2, models.Count);
         Assert.Equal(Exchange, models[0].Exchange);
-        Assert.Equal("BTC", models[0].Name);
+        Assert.Equal(Coin.BTC, models[0].Name);
         Assert.Equal(Currency.AUD, models[0].Currency);
         Assert.Equal(10000, models[0].Bid);
         Assert.Equal(10001, models[0].Ask);
         Assert.Equal(10000.5m, models[0].Last);
         Assert.Equal(dtos[0].Timestamp, models[0].Timestamp);
         Assert.Equal(Exchange, models[1].Exchange);
-        Assert.Equal("ETH", models[1].Name);
+        Assert.Equal(Coin.ETH, models[1].Name);
         Assert.Equal(Currency.AUD, models[1].Currency);
         Assert.Equal(500, models[1].Bid);
         Assert.Equal(501, models[1].Ask);

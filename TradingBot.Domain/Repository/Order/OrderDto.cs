@@ -10,8 +10,8 @@ public record OrderDto(
     decimal Amount,
     bool Cancelled,
     decimal? Total,
-    DateTimeOffset? SoldDate,
+    DateTime? SoldDate,
     decimal? AudFeeExGst,
     decimal? AudGst,
     decimal? AudTotal,
-    DateTimeOffset? Timestamp);
+    DateTime? Timestamp);

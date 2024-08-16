@@ -1,4 +1,5 @@
 using TradingBot.Domain.API.CoinSpotAPI.Response;
+using TradingBot.Domain.Enum;
 using TradingBot.Domain.Mapping;
 
 namespace TradingBot.Domain.Tests.Mapping;
@@ -16,7 +17,7 @@ public class GetLatestPricesResponseMappingExtensionTests
             Prices = new Dictionary<string, PriceDetail>
             {
                 {
-                    "BTC", new()
+                    Coin.BTC, new()
                     {
                         Ask = "1000",
                         Bid = "900",
@@ -24,7 +25,7 @@ public class GetLatestPricesResponseMappingExtensionTests
                     }
                 },
                 {
-                    "ETH", new()
+                    Coin.ETH, new()
                     {
                         Ask = "100",
                         Bid = "90",
@@ -40,12 +41,12 @@ public class GetLatestPricesResponseMappingExtensionTests
         // Assert
         Assert.Equal(2, result.Count);
         Assert.Equal(TestExchange, result[0].Exchange);
-        Assert.Equal("BTC", result[0].Name);
+        Assert.Equal(Coin.BTC, result[0].Name);
         Assert.Equal(1000, result[0].Ask);
         Assert.Equal(900, result[0].Bid);
         Assert.Equal(950, result[0].Last);
         Assert.Equal(TestExchange, result[1].Exchange);
-        Assert.Equal("ETH", result[1].Name);
+        Assert.Equal(Coin.ETH, result[1].Name);
         Assert.Equal(100, result[1].Ask);
         Assert.Equal(90, result[1].Bid);
         Assert.Equal(95, result[1].Last);

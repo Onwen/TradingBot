@@ -11,13 +11,13 @@ public static class GetCompletedMarketOrdersResponseMappingExtension
     {
         return new MarketOrderModel
         {
-            Market = order.Market,
+            Market = order.Market.ToUpper(),
             Amount = order.Amount,
             Rate = order.Rate,
             Id = order.Id,
             Exchange = exchange,
-            OrderType = orderType,
-            Coin = order.Coin,
+            OrderType = orderType.ToUpper(),
+            Coin = order.Coin.ToUpper(),
             Total = order.Total,
             AudGst = order.AudGst,
             AudTotal = order.AudTotal,

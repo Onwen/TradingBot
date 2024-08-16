@@ -17,7 +17,7 @@ public static class StrategyLogModelMappingExtension
         (
             model.StrategyName,
             model.Message,
-            model.Timestamp
+            model.Timestamp.DateTime
         );
     }
     // Map a List<StrategyLogModel> to a List<StrategyLogDto>
