@@ -17,3 +17,6 @@ You will also need to provide your own api-key and secret for coinspot, as with 
 - Extend API to allow triggering of Backtests
 - Create a UI to easily visualise performance, configure strategies and execute backtests
 - Dockerise project to allow easy deployment (eg. to a raspberry pi)
+
+## Disclaimer
+- This TradingBot is designed as a learning experience, it WILL NOT make you money.
