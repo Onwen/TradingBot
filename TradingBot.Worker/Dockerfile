@@ -5,7 +5,7 @@ WORKDIR /src
 COPY ["TradingBot.Worker/*.csproj", "TradingBot.Worker/"]
 COPY ["TradingBot.Domain/*.csproj", "TradingBot.Domain/"]
 COPY ["TradingBot.Infrastructure/*.csproj", "TradingBot.Infrastructure/"]
-COPY ["TradingBot.UseCases/*.csproj", "TradingBot.UseCases/"]
+COPY ["TradingBot.Usecases/*.csproj", "TradingBot.Usecases/"]
 
 # Adjust paths if needed to match your actual project structure
 RUN dotnet restore "TradingBot.Worker/TradingBot.Worker.csproj"
