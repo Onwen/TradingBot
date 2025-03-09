@@ -33,10 +33,10 @@ public static class DependencyInjectionExtensions
 public static void ConfigureWorkers(this IServiceCollection collection)
 {
     collection.AddHostedService<PriceFetcherWorker>();
-    collection.AddHostedService<DailyReturnCalculatorWorker>();
-    collection.AddHostedService<StrategyExecutorWorker>();
-    collection.AddHostedService<DataIngestWorker>();
-    collection.AddHostedService<BacktestWorker>();
+    // collection.AddHostedService<DailyReturnCalculatorWorker>();
+    // collection.AddHostedService<StrategyExecutorWorker>();
+    // collection.AddHostedService<DataIngestWorker>();
+    // collection.AddHostedService<BacktestWorker>();
 }
 public static void ConfigureSettings(this IServiceCollection collection, IConfigurationManager configurationManager)
 {
