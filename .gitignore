@@ -289,6 +289,10 @@ __pycache__/
 *.xsd.cs
 /TradingBot.Worker/Migrations
 TradingBot.Worker/appsettings.Development.json
-TradingBot.Worker/appsettings.json
 TradingBot.Api/appsettings.json
 TradingBot.Api/appsettings.Development.json
+
+# Local configuration with secrets
+appsettings.Development.json
+appsettings.Production.json
+appsettings.local.json
