@@ -24,7 +24,11 @@ public class PriceFetcherWorker(
     {
         using var scope = scopeFactory.CreateScope();
         var pricingService = scope.ServiceProvider.GetRequiredService<IPricingService>();
-        SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_AWAYMODE_REQUIRED);
+        // Only call Windows-specific function when running on Windows
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            PreventSleep();
+        }
         await pricingService.GetPriceSnapshotsAsync();
         logger.LogInformation("{worker} retrieved price snapshots at: {time}", WorkerName(), _timeProvider.GetUtcNow());
     }
@@ -38,6 +42,12 @@ public class PriceFetcherWorker(
         nextFiveMinute = nextFiveMinute.AddMinutes(5 - remainder);
         var timeToSleep = nextFiveMinute - now;
         return (int)timeToSleep.TotalMilliseconds;
+    }
+
+    // Private method to prevent sleep on Windows
+    private void PreventSleep()
+    {
+        SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_AWAYMODE_REQUIRED);
     }
 
     [Flags]
