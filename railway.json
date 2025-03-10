@@ -5,7 +5,7 @@
     "dockerfilePath": "TradingBot.Worker/Dockerfile"
   },
   "deploy": {
-    "startCommand": "dotnet TradingBot.Worker.dll",
+    "startCommand": "dotnet TradingBot.Worker.dll --worker=PriceFetcherWorker",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
