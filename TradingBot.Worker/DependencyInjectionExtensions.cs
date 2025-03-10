@@ -50,7 +50,7 @@ public static class DependencyInjectionExtensions
                 collection.AddHostedService<BacktestWorker>();
                 break;
             default:
-                throw new ArgumentException("Invalid worker type");
+                throw new ArgumentException($"Invalid worker type [{workerType}]");
         }
     }
     public static void ConfigureSettings(this IServiceCollection collection, IConfigurationManager configurationManager)
