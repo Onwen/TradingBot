@@ -29,62 +29,77 @@ namespace TradingBot.Worker;
 
 public static class DependencyInjectionExtensions
 {
-    
-public static void ConfigureWorkers(this IServiceCollection collection)
-{
-    collection.AddHostedService<PriceFetcherWorker>();
-    // collection.AddHostedService<DailyReturnCalculatorWorker>();
-    // collection.AddHostedService<StrategyExecutorWorker>();
-    // collection.AddHostedService<DataIngestWorker>();
-    // collection.AddHostedService<BacktestWorker>();
-}
-public static void ConfigureSettings(this IServiceCollection collection, IConfigurationManager configurationManager)
-{
-    collection.Configure<CoinspotApiSettings>(configurationManager.GetSection("CoinspotApiSettings"));
-    collection.Configure<StrategyExecutorConfig>(configurationManager.GetSection("StrategyExecutorConfig"));
-}
-public static void ConfigureDatabase(this IServiceCollection collection, IConfigurationManager configurationManager)
-{
-    collection
-        .AddDbContext<ApplicationDbContext>(
-            options => options.UseNpgsql(configurationManager.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("TradingBot.Worker")));
-}
-public static void ConfigureServices(this IServiceCollection collection)
-{
-    // Configure Serilog
+
+    public static void ConfigureWorkers(this IServiceCollection collection, string workerType)
+    {
+        switch (workerType)
+        {
+            case "PriceFetcherWorker":
+                collection.AddHostedService<PriceFetcherWorker>();
+                break;
+            case "DailyReturnCalculatorWorker":
+                collection.AddHostedService<DailyReturnCalculatorWorker>();
+                break;
+            case "StrategyExecutorWorker":
+                collection.AddHostedService<StrategyExecutorWorker>();
+                break;
+            case "DataIngestWorker":
+                collection.AddHostedService<DataIngestWorker>();
+                break;
+            case "BacktestWorker":
+                collection.AddHostedService<BacktestWorker>();
+                break;
+            default:
+                throw new ArgumentException("Invalid worker type");
+        }
+    }
+    public static void ConfigureSettings(this IServiceCollection collection, IConfigurationManager configurationManager)
+    {
+        collection.Configure<CoinspotApiSettings>(configurationManager.GetSection("CoinspotApiSettings"));
+        collection.Configure<StrategyExecutorConfig>(configurationManager.GetSection("StrategyExecutorConfig"));
+    }
+    public static void ConfigureDatabase(this IServiceCollection collection, IConfigurationManager configurationManager)
+    {
+        collection
+            .AddDbContext<ApplicationDbContext>(
+                options => options.UseNpgsql(configurationManager.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("TradingBot.Worker")));
+    }
+    public static void ConfigureServices(this IServiceCollection collection)
+    {
+        // Configure Serilog
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
             .Enrich.FromLogContext()
             .Enrich.WithCaller()
             .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}]  {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
-    // Register Serilog as the logging provider
-    collection.AddSerilog(Log.Logger);
-    
-    //TODO: tidy up how we register the services
-    collection
-        .AddScoped<IExchangeService, CoinSpotExchangeService>()
-        .AddScoped<IPortfolioService, PortfolioService>()
-        .AddScoped<IPricingService, PricingService>()
-        .AddScoped<IExchangeProvider, CoinSpotExchangeProvider>()
-        .AddScoped<ITradeRepository, TradeRepository>()
-        .AddScoped<IPositionSnapshotRepository, PriceSnapshotRepository>()
-        .AddScoped<IPositionRepository, PositionRepository>()
-        .AddScoped<IPositionTargetWeightingRepository, PositionTargetWeightingRepository>()
-        .AddScoped<IStrategyLogRepository, StrategyLogRepository>()
-        .AddScoped<IReturnRepository, ReturnRepository>()
-        .AddScoped<IPriceHistoryRepository, PriceHistoryRepository>()
-        .AddScoped<IStrategyExecutor, StrategyExecutor>()
-        .AddScoped<IStrategyFactory, StrategyFactory>()
-        .AddScoped<ITradeExecutor, TradeExecutor>()
-        .AddScoped<FixedAllocationStrategy>()
-        .AddScoped<VARStrategy>()
-        .AddScoped<IOrderRepository, OrderRepository>()
-        .AddSingleton<TimeProvider, SystemTimeProvider>()
-        .AddScoped<AuthorisationDelegatingHandler>()
-        .AddRefitClient<ICoinSpotApi>()
-        .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.coinspot.com.au")) // TODO: should be reading from appsettings.json
-        .AddHttpMessageHandler<AuthorisationDelegatingHandler>();
-}
+        // Register Serilog as the logging provider
+        collection.AddSerilog(Log.Logger);
+
+        //TODO: tidy up how we register the services
+        collection
+            .AddScoped<IExchangeService, CoinSpotExchangeService>()
+            .AddScoped<IPortfolioService, PortfolioService>()
+            .AddScoped<IPricingService, PricingService>()
+            .AddScoped<IExchangeProvider, CoinSpotExchangeProvider>()
+            .AddScoped<ITradeRepository, TradeRepository>()
+            .AddScoped<IPositionSnapshotRepository, PriceSnapshotRepository>()
+            .AddScoped<IPositionRepository, PositionRepository>()
+            .AddScoped<IPositionTargetWeightingRepository, PositionTargetWeightingRepository>()
+            .AddScoped<IStrategyLogRepository, StrategyLogRepository>()
+            .AddScoped<IReturnRepository, ReturnRepository>()
+            .AddScoped<IPriceHistoryRepository, PriceHistoryRepository>()
+            .AddScoped<IStrategyExecutor, StrategyExecutor>()
+            .AddScoped<IStrategyFactory, StrategyFactory>()
+            .AddScoped<ITradeExecutor, TradeExecutor>()
+            .AddScoped<FixedAllocationStrategy>()
+            .AddScoped<VARStrategy>()
+            .AddScoped<IOrderRepository, OrderRepository>()
+            .AddSingleton<TimeProvider, SystemTimeProvider>()
+            .AddScoped<AuthorisationDelegatingHandler>()
+            .AddRefitClient<ICoinSpotApi>()
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.coinspot.com.au")) // TODO: should be reading from appsettings.json
+            .AddHttpMessageHandler<AuthorisationDelegatingHandler>();
+    }
 }

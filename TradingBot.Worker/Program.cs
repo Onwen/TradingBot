@@ -8,12 +8,14 @@ using TradingBot.Infrastructure.Repository.DataContext;
 // Tell Railway this is a background service, not a web service
 Environment.SetEnvironmentVariable("RAILWAY_SERVICE_TYPE", "WORKER");
 
+var workerType = args.FirstOrDefault(a => a.StartsWith("--worker="))?.Replace("--worker=", "");
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.ConfigureServices();
 builder.Services.ConfigureSettings(builder.Configuration);
 builder.Services.ConfigureDatabase(builder.Configuration);
-builder.Services.ConfigureWorkers();
+builder.Services.ConfigureWorkers(workerType);
 
 var host = builder.Build();
 

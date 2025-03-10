@@ -25,4 +25,4 @@ RUN dotnet publish "TradingBot.Worker.csproj" -c Release -o /app/publish -r linu
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TradingBot.Worker.dll"]
+ENTRYPOINT ["dotnet", "TradingBot.Worker.dll", "--worker=PriceFetcherWorker"]
